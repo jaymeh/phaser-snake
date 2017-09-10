@@ -13,18 +13,54 @@ import Phaser from 'expose-loader?Phaser!phaser-ce/build/custom/phaser-split.js'
  * And render a single sprite so we make sure it works.
  */
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var gridSize = 17;
+var game = new Phaser.Game(gridSize * gridSize, gridSize * gridSize, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var player;
+var currentSpeed = 0;
+var speed = 60;
 
 function preload() {
-  game.load.image('logo', './assets/images/phaser.png');
+  game.load.image('player', './assets/images/green.png');
 }
 
 function create() {
-  var logo = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
-  logo.anchor.setTo(0.5, 0.5);
+
+	var graphics = game.add.graphics(0, 0);
+	player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+	player.anchor.setTo(.5, .5);
+
+	// Columns
+	for(var i = 0; i < gridSize; i++)
+	{
+		// Rows
+		for(var n = 0; n < gridSize; n++)
+		{
+			graphics.moveTo(0,0);
+			graphics.lineStyle(1, 0x0000FF, 1);
+			graphics.drawRect(gridSize * i, gridSize * n, gridSize, gridSize);
+		}
+	}
+
+  	// Build the grid
 };
   
 function update() {
-  // ¯ \_(ツ)_/¯ 
-  // "surprise me"
+	// Check death
+	if(player.x > game.world.width) {
+		player.x = 0;
+	}
+
+	// Check not tail collision
+
+	// Check if food
+
+	// Movement
+
+	if(currentSpeed == speed)
+	{
+		player.x += gridSize;
+		currentSpeed = 0;
+	}
+
+	currentSpeed++;
 }
