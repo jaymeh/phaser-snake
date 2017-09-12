@@ -19,6 +19,17 @@ var player;
 var currentSpeed = 0;
 var speed = 60;
 
+var direction = 'right';
+
+var upKey;
+var downKey;
+var leftKey;
+var rightKey;
+var lastMoved = 'right';
+
+var tail = [];
+var initialTailLength = 5;
+
 function preload() {
   game.load.image('player', './assets/images/green.png');
 }
@@ -26,8 +37,18 @@ function preload() {
 function create() {
 
 	var graphics = game.add.graphics(0, 0);
-	player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
-	player.anchor.setTo(.5, .5);
+	
+	for(var i = 0; i < initialTailLength; i++)
+	{
+		tail[i] = game.add.sprite(game.world.centerX - (i * gridSize), game.world.centerY, 'player');
+		tail[i].anchor.setTo(.5, .5);
+	}
+
+	// Setup Controls
+	upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+    downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+    leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+    rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
 	// Columns
 	for(var i = 0; i < gridSize; i++)
@@ -46,21 +67,93 @@ function create() {
   
 function update() {
 	// Check death
-	if(player.x > game.world.width) {
-		player.x = 0;
-	}
+	_wrap_world();
+
+	// Set Direction
+	_set_direction();
 
 	// Check not tail collision
 
 	// Check if food
 
 	// Movement
+	_handleMovement();
+}
 
+function _wrap_world()
+{
+	if(tail[0].x > game.world.width) {
+		tail[0].x = 0 + (tail[0].width / 2);
+	}
+
+	if(tail[0].x < 0) {
+		tail[0].x = game.world.width - (tail[0].width / 2);
+	}
+
+	if(tail[0].y > game.world.height) {
+		tail[0].y = 0 + (tail[0].height / 2);
+	}
+
+	if(tail[0].y < 0) {
+		tail[0].y = game.world.height - (tail[0].height / 2);
+	}
+}
+
+function _set_direction()
+{
+	if(leftKey.isDown && lastMoved != "right") direction = "left";
+	else if(upKey.isDown && lastMoved != "down") direction = "up";
+	else if(rightKey.isDown && lastMoved != "left") direction = "right";
+	else if(downKey.isDown && lastMoved != "up") direction = "down";
+}
+
+function _handleMovement()
+{
 	if(currentSpeed == speed)
 	{
-		player.x += gridSize;
+		switch(direction)
+		{
+			// case 'up':
+			// 	_movePlayer(tail[0].x, tail[0].y - gridSize);
+			// 	lastMoved = direction;
+			// 	break;
+
+			// case 'down':
+			// 	player.y += gridSize;
+			// 	lastMoved = direction;
+			// 	break;
+
+			// case 'left':
+			// 	player.x -= gridSize;
+			// 	lastMoved = direction;
+			// 	break;
+
+			case 'right':
+				_movePlayer(tail[0].x + gridSize, tail[0].y);
+				lastMoved = direction;
+				break;
+		}
+		
 		currentSpeed = 0;
 	}
 
 	currentSpeed++;
+}
+
+function _movePlayer(x, y)
+{
+	var previousX = 0;
+	for(var i = 0; i < tail.length; i++)
+	{
+		if(i == 0)
+		{
+			tail[i].x = x;
+			tail[i].y = y;
+		}
+		else
+		{
+			tail[i].x = tail[(i - 1)].x;
+			tail[i].y = y;
+		}
+	}
 }
