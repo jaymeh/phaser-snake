@@ -17,7 +17,7 @@ var gridSize = 17;
 var game = new Phaser.Game(gridSize * gridSize, gridSize * gridSize, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 var player;
 var currentSpeed = 0;
-var speed = 60;
+var speed = 15;
 
 var direction = 'right';
 
@@ -113,20 +113,20 @@ function _handleMovement()
 	{
 		switch(direction)
 		{
-			// case 'up':
-			// 	_movePlayer(tail[0].x, tail[0].y - gridSize);
-			// 	lastMoved = direction;
-			// 	break;
+			case 'up':
+				_movePlayer(tail[0].x, tail[0].y - gridSize);
+				lastMoved = direction;
+				break;
 
-			// case 'down':
-			// 	player.y += gridSize;
-			// 	lastMoved = direction;
-			// 	break;
+			case 'down':
+				_movePlayer(tail[0].x, tail[0].y + gridSize);
+				lastMoved = direction;
+				break;
 
-			// case 'left':
-			// 	player.x -= gridSize;
-			// 	lastMoved = direction;
-			// 	break;
+			case 'left':
+				_movePlayer(tail[0].x - gridSize, tail[0].y);
+				lastMoved = direction;
+				break;
 
 			case 'right':
 				_movePlayer(tail[0].x + gridSize, tail[0].y);
@@ -142,7 +142,13 @@ function _handleMovement()
 
 function _movePlayer(x, y)
 {
-	var previousX = 0;
+	var oldPosition = [];
+	for(var i = 0; i < tail.length; i++)
+	{
+		oldPosition.push({'x': tail[i].x, 'y': tail[i].y});
+	}
+
+	// Set a array for all old tail data to use later
 	for(var i = 0; i < tail.length; i++)
 	{
 		if(i == 0)
@@ -152,8 +158,9 @@ function _movePlayer(x, y)
 		}
 		else
 		{
-			tail[i].x = tail[(i - 1)].x;
-			tail[i].y = y;
+			var newI = i - 1;
+			tail[i].x = oldPosition[i - 1].x;
+			tail[i].y = oldPosition[i - 1].y;
 		}
 	}
 }
