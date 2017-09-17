@@ -29,9 +29,11 @@ var lastMoved = 'right';
 
 var tail = [];
 var initialTailLength = 5;
+var food_item;
 
 function preload() {
   game.load.image('player', './assets/images/green.png');
+  game.load.image('food', './assets/images/food.png');
 }
 
 function create() {
@@ -50,6 +52,7 @@ function create() {
     leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
+	// Build the grid
 	// Columns
 	for(var i = 0; i < gridSize; i++)
 	{
@@ -62,7 +65,8 @@ function create() {
 		}
 	}
 
-  	// Build the grid
+  	// Generate the food
+  	_generateFood();
 };
   
 function update() {
@@ -163,4 +167,55 @@ function _movePlayer(x, y)
 			tail[i].y = oldPosition[i - 1].y;
 		}
 	}
+}
+
+function _generateFood()
+{
+	// Generate random x
+	var x = _generateX();
+	var y = _generateY();
+
+	for(var i = 0; i < tail.length; i++)
+	{
+		var match = false;
+		while(match == false)
+		{
+			if(tail[i].x == x && tail[i].y == y)
+			{
+				x = _generateX();
+				y = _generateY();
+			}
+			else
+			{
+				match = true;
+			}
+		}
+	}
+
+	food_item = game.add.sprite(x * gridSize, y * gridSize, 'food');
+
+	console.log(food_item);
+
+	// Generate Random y
+
+	// Randomly spawn a food object
+	//x = 
+
+	// Pick a random place + check nothing in it
+
+	// If there is something there repick
+}
+
+function _generateX()
+{
+	var x = Math.floor(Math.random() * gridSize);
+
+	return x;
+}
+
+function _generateY()
+{
+	var y = Math.floor(Math.random() * gridSize);
+
+	return y;
 }
