@@ -18,6 +18,7 @@ var game = new Phaser.Game(gridSize * gridSize, gridSize * gridSize, Phaser.AUTO
 var player;
 var currentSpeed = 0;
 var speed = 15;
+var borderOffset = 1;
 
 var direction = 'right';
 
@@ -38,13 +39,18 @@ function preload() {
 
 function create() {
 
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+
 	var graphics = game.add.graphics(0, 0);
 	
-	for(var i = 0; i < initialTailLength; i++)
+	for(var i = 1; i < initialTailLength + 1; i++)
 	{
-		tail[i] = game.add.sprite(game.world.centerX - (i * gridSize), game.world.centerY, 'player');
-		tail[i].anchor.setTo(.5, .5);
+		tail[i - 1] = game.add.sprite(game.world.centerX - (i * gridSize), game.world.centerY, 'player');
+		tail[i - 1].anchor.setTo(.5, .5);
+		game.physics.arcade.enable(tail[i - 1]);
 	}
+
+	console.log(tail);
 
 	// Setup Controls
 	upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -65,6 +71,9 @@ function create() {
 		}
 	}
 
+	direction = 'right';
+	lastMoved = 'left';
+
   	// Generate the food
   	_generateFood();
 };
@@ -76,12 +85,15 @@ function update() {
 	// Set Direction
 	_set_direction();
 
-	// Check not tail collision
-
-	// Check if food
-
 	// Movement
 	_handleMovement();
+
+	// Check if food
+	
+
+
+	// Check not tail collision
+	_check_tail_collision();
 }
 
 function _wrap_world()
@@ -154,7 +166,7 @@ function _movePlayer(x, y)
 
 	// Set a array for all old tail data to use later
 	for(var i = 0; i < tail.length; i++)
-	{
+	{		
 		if(i == 0)
 		{
 			tail[i].x = x;
@@ -171,10 +183,12 @@ function _movePlayer(x, y)
 
 function _generateFood()
 {
-	// Generate random x
+	// Generate random x and y
 	var x = _generateX();
 	var y = _generateY();
 
+	// Loop through the tail and check that our spawn position doesn't match the position of the snake.
+	// If it does we want to regenerate until it doesn't.
 	for(var i = 0; i < tail.length; i++)
 	{
 		var match = false;
@@ -192,18 +206,9 @@ function _generateFood()
 		}
 	}
 
-	food_item = game.add.sprite(x * gridSize, y * gridSize, 'food');
-
-	console.log(food_item);
-
-	// Generate Random y
-
-	// Randomly spawn a food object
-	//x = 
-
-	// Pick a random place + check nothing in it
-
-	// If there is something there repick
+	food_item = game.add.sprite((x * gridSize) + borderOffset, (y * gridSize) + borderOffset, 'food');
+	
+	game.physics.arcade.enable(food_item);
 }
 
 function _generateX()
@@ -218,4 +223,26 @@ function _generateY()
 	var y = Math.floor(Math.random() * gridSize);
 
 	return y;
+}
+
+function _trigger_death(one, two)
+{
+	console.log(tail);
+	console.log(one, two);
+	console.log(direction);
+	// console.log(one);
+	// console.log(two);
+	game.state.restart();
+}
+
+function _check_tail_collision()
+{
+	for(var i = 0; i < tail.length; i++)
+	{
+		if(i !== 0)
+		{
+			var overlap = game.physics.arcade.overlap(tail[0], tail[i], _trigger_death, null, this);
+			//console.log(overlap);
+		}
+	}
 }
