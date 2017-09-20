@@ -47,10 +47,14 @@ function create() {
 	{
 		tail[i - 1] = game.add.sprite(game.world.centerX - (i * gridSize), game.world.centerY, 'player');
 		tail[i - 1].anchor.setTo(.5, .5);
+		
 		game.physics.arcade.enable(tail[i - 1]);
-	}
 
-	console.log(tail);
+		if(i !== 0)
+		{
+			game.physics.arcade.overlap(tail[0], tail[i], _trigger_death, null, this);
+		}
+	}
 
 	// Setup Controls
 	upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -85,15 +89,14 @@ function update() {
 	// Set Direction
 	_set_direction();
 
-	// Movement
-	_handleMovement();
-
 	// Check if food
-	
+	_check_food_eat();
 
+	// Movement
+	_handle_movement();
 
 	// Check not tail collision
-	_check_tail_collision();
+	// _check_tail_collision();
 }
 
 function _wrap_world()
@@ -123,7 +126,7 @@ function _set_direction()
 	else if(downKey.isDown && lastMoved != "up") direction = "down";
 }
 
-function _handleMovement()
+function _handle_movement()
 {
 	if(currentSpeed == speed)
 	{
@@ -227,11 +230,6 @@ function _generateY()
 
 function _trigger_death(one, two)
 {
-	console.log(tail);
-	console.log(one, two);
-	console.log(direction);
-	// console.log(one);
-	// console.log(two);
 	game.state.restart();
 }
 
@@ -241,8 +239,52 @@ function _check_tail_collision()
 	{
 		if(i !== 0)
 		{
-			var overlap = game.physics.arcade.overlap(tail[0], tail[i], _trigger_death, null, this);
-			//console.log(overlap);
+			
 		}
 	}
+}
+
+function _check_food_eat()
+{
+	// Check if theres some food
+	game.physics.arcade.overlap(tail[0], food_item, _eat_food, null, this);
+}
+
+function _eat_food()
+{
+	food_item.destroy();
+
+	var last_item = tail[tail.length - 1];
+	var second_last_item = tail[tail.length - 2];
+
+	// Use abs to round up because it could be - or +
+	var xDiff = last_item.x - second_last_item.x;
+	var yDiff = last_item.y - second_last_item.y;
+
+	var nextX = last_item.x - xDiff;
+	var nextY = last_item.y - yDiff;
+
+	console.log(nextX);
+	console.log(nextY);
+	console.log(last_item);
+
+	var tail_item = game.add.sprite(nextX, nextX, 'player')
+
+	tail_item.anchor.setTo(.5, .5);
+	game.physics.arcade.enable(tail_item);
+
+	game.physics.arcade.overlap(tail[0], tail_item, _trigger_death, null, this);
+
+	tail.push(tail_item);
+
+	console.log(tail.length);
+
+	_generateFood();
+	// Find out which direction we are going
+	
+	// Calculate x and y somehow
+	
+	// Add to score
+	
+	// Trigger a move for the food item
 }
