@@ -32,6 +32,9 @@ var tail = [];
 var initialTailLength = 5;
 var food_item;
 
+var food_overlap;
+var tail_overlap;
+
 function preload() {
   game.load.image('player', './assets/images/green.png');
   game.load.image('food', './assets/images/food.png');
@@ -50,10 +53,7 @@ function create() {
 		
 		game.physics.arcade.enable(tail[i - 1]);
 
-		if(i !== 0)
-		{
-			game.physics.arcade.overlap(tail[0], tail[i], _trigger_death, null, this);
-		}
+		tail[i - 1].enableBody = true;
 	}
 
 	// Setup Controls
@@ -89,32 +89,32 @@ function update() {
 	// Set Direction
 	_set_direction();
 
+	// Check not tail collision
+	_check_tail_collision();
+
 	// Check if food
 	_check_food_eat();
 
 	// Movement
 	_handle_movement();
-
-	// Check not tail collision
-	// _check_tail_collision();
 }
 
 function _wrap_world()
 {
-	if(tail[0].x > game.world.width) {
-		tail[0].x = 0 + (tail[0].width / 2);
+	if(tail[0].body.x > game.world.width) {
+		tail[0].body.x = 0;
 	}
 
 	if(tail[0].x < 0) {
-		tail[0].x = game.world.width - (tail[0].width / 2);
+		tail[0].body.x = game.world.width - tail[0].width;
 	}
 
 	if(tail[0].y > game.world.height) {
-		tail[0].y = 0 + (tail[0].height / 2);
+		tail[0].body.y = 0;
 	}
 
 	if(tail[0].y < 0) {
-		tail[0].y = game.world.height - (tail[0].height / 2);
+		tail[0].body.y = game.world.height - tail[0].height;
 	}
 }
 
@@ -133,22 +133,22 @@ function _handle_movement()
 		switch(direction)
 		{
 			case 'up':
-				_movePlayer(tail[0].x, tail[0].y - gridSize);
+				_movePlayer(tail[0].body.x, tail[0].body.y - gridSize);
 				lastMoved = direction;
 				break;
 
 			case 'down':
-				_movePlayer(tail[0].x, tail[0].y + gridSize);
+				_movePlayer(tail[0].body.x, tail[0].body.y + gridSize);
 				lastMoved = direction;
 				break;
 
 			case 'left':
-				_movePlayer(tail[0].x - gridSize, tail[0].y);
+				_movePlayer(tail[0].body.x - gridSize, tail[0].body.y);
 				lastMoved = direction;
 				break;
 
 			case 'right':
-				_movePlayer(tail[0].x + gridSize, tail[0].y);
+				_movePlayer(tail[0].body.x + gridSize, tail[0].body.y);
 				lastMoved = direction;
 				break;
 		}
@@ -164,7 +164,7 @@ function _movePlayer(x, y)
 	var oldPosition = [];
 	for(var i = 0; i < tail.length; i++)
 	{
-		oldPosition.push({'x': tail[i].x, 'y': tail[i].y});
+		oldPosition.push({'x': tail[i].body.x, 'y': tail[i].body.y});
 	}
 
 	// Set a array for all old tail data to use later
@@ -172,14 +172,14 @@ function _movePlayer(x, y)
 	{		
 		if(i == 0)
 		{
-			tail[i].x = x;
-			tail[i].y = y;
+			tail[i].body.x = x;
+			tail[i].body.y = y;
 		}
 		else
 		{
 			var newI = i - 1;
-			tail[i].x = oldPosition[i - 1].x;
-			tail[i].y = oldPosition[i - 1].y;
+			tail[i].body.x = oldPosition[i - 1].x;
+			tail[i].body.y = oldPosition[i - 1].y;
 		}
 	}
 }
@@ -194,10 +194,12 @@ function _generateFood()
 	// If it does we want to regenerate until it doesn't.
 	for(var i = 0; i < tail.length; i++)
 	{
+		console.log(tail_overlap);
+		console.log(food_overlap);
 		var match = false;
 		while(match == false)
 		{
-			if(tail[i].x == x && tail[i].y == y)
+			if(tail[i].body.x == x && tail[i].body.y == y)
 			{
 				x = _generateX();
 				y = _generateY();
@@ -239,7 +241,7 @@ function _check_tail_collision()
 	{
 		if(i !== 0)
 		{
-			
+			tail_overlap = game.physics.arcade.overlap(tail[0], tail[i], _trigger_death, null, this);
 		}
 	}
 }
@@ -247,10 +249,10 @@ function _check_tail_collision()
 function _check_food_eat()
 {
 	// Check if theres some food
-	game.physics.arcade.overlap(tail[0], food_item, _eat_food, null, this);
+	food_overlap = game.physics.arcade.overlap(tail[0], food_item, _eat_food, null, this);
 }
 
-function _eat_food()
+function _eat_food(first_tail, food_item)
 {
 	food_item.destroy();
 
@@ -258,26 +260,20 @@ function _eat_food()
 	var second_last_item = tail[tail.length - 2];
 
 	// Use abs to round up because it could be - or +
-	var xDiff = last_item.x - second_last_item.x;
-	var yDiff = last_item.y - second_last_item.y;
+	var xDiff = last_item.body.x - second_last_item.body.x;
+	var yDiff = last_item.body.y - second_last_item.body.y;
 
 	var nextX = last_item.x - xDiff;
 	var nextY = last_item.y - yDiff;
 
-	console.log(nextX);
-	console.log(nextY);
-	console.log(last_item);
-
 	var tail_item = game.add.sprite(nextX, nextX, 'player')
-
 	tail_item.anchor.setTo(.5, .5);
 	game.physics.arcade.enable(tail_item);
-
-	game.physics.arcade.overlap(tail[0], tail_item, _trigger_death, null, this);
+	tail_item.enableBody = true;
 
 	tail.push(tail_item);
 
-	console.log(tail.length);
+	console.log('just ate');
 
 	_generateFood();
 	// Find out which direction we are going
