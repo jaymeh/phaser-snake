@@ -230,8 +230,9 @@ function _generateY()
 	return y;
 }
 
-function _trigger_death(one, two)
+function _trigger_death()
 {
+	tail = [];
 	game.state.restart();
 }
 
@@ -263,8 +264,8 @@ function _eat_food(first_tail, food_item)
 	var xDiff = last_item.body.x - second_last_item.body.x;
 	var yDiff = last_item.body.y - second_last_item.body.y;
 
-	var nextX = last_item.x - xDiff;
-	var nextY = last_item.y - yDiff;
+	var nextX = -100;
+	var nextY = -100;
 
 	var tail_item = game.add.sprite(nextX, nextX, 'player')
 	tail_item.anchor.setTo(.5, .5);
