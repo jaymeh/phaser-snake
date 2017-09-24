@@ -57,14 +57,13 @@ function create() {
 	var graphics = game.add.graphics(0, 0);
 
 	var x = Math.ceil(gridSize / 2) * gridSize + (borderSide);
-	var y = Math.ceil(gridSize / 2) * gridSize + (borderTop);
+	var y = Math.ceil(gridSize / 2) * gridSize;
 
-	console.log(x);
+	y += (borderTop);
 	
 	for(var i = 1; i < initialTailLength + 1; i++)
 	{
-		tail[i - 1] = game.add.sprite(x - (i * gridSize) + (borderSide + 2), y + ((borderTop) + 2), 'player');
-		//tail[i - 1].anchor.setTo(.5, .5);
+		tail[i - 1] = game.add.sprite(x - (i * gridSize) + (borderSide + 2), y + 2, 'player');
 	}
 
 	// Setup Controls
@@ -214,7 +213,10 @@ function _generateFood()
 		var match = false;
 		while(match == false)
 		{
-			if(tail[i].x == x && tail[i].y == y)
+			var positionX = (x * gridSize) + (borderOffset + borderSide);
+			var positionY = (y * gridSize) + (borderOffset + borderTop);			
+
+			if(tail[i].x == positionX && tail[i].y == positionY)
 			{
 				x = _generateX();
 				y = _generateY();
@@ -262,11 +264,6 @@ function _check_tail_collision()
 
 function _check_food_eat()
 {
-	if(currentSpeed == 10)
-	{
-		console.log('Tail: ', tail[0].x, tail[0].y);
-		console.log('Food: ', food_item.x, food_item.y);
-	}
 	// Check if theres some food
 	if(tail[0].x == food_item.x && tail[0].y == food_item.y)
 	{
@@ -281,8 +278,7 @@ function _eat_food(first_tail)
 	var nextX = -100;
 	var nextY = -100;
 
-	var tail_item = game.add.sprite(nextX, nextX, 'player')
-	//tail_item.anchor.setTo(.5, .5);
+	var tail_item = game.add.sprite(nextX, nextX, 'player');
 
 	tail.push(tail_item);
 
