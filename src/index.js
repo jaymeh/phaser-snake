@@ -42,7 +42,9 @@ var gridWidth = (gridSize * gridSize) + (borderSide * 2);
 var gridHeight = (gridSize * gridSize) + borderTop;
 
 var score = 0;
+var score_amount;
 var score_text;
+var width_offset = 5;
 
 function preload() {
   game.load.image('player', './assets/images/green.png');
@@ -59,11 +61,11 @@ function create() {
 	var x = Math.ceil(gridSize / 2) * gridSize + (borderSide);
 	var y = Math.ceil(gridSize / 2) * gridSize;
 
-	y += (borderTop);
+	y += (borderTop)
 	
 	for(var i = 1; i < initialTailLength + 1; i++)
 	{
-		tail[i - 1] = game.add.sprite(x - (i * gridSize) + (borderSide + 2), y + 2, 'player');
+		tail[i - 1] = game.add.sprite(x - (i * gridSize) + (borderSide + 2), y + 1, 'player');
 	}
 
 	// Setup Controls
@@ -86,8 +88,11 @@ function create() {
 	}
 
 	// Draw score title
-	score_text = this.game.add.text(game.world.width / 2, borderTop / 2, "Score: " + score, {font:"2rem Wendy One", fill:"#FFFFFF"});
-	score_text.anchor.setTo(0.5, 0.5);
+	score_text = this.game.add.text((game.world.width / 2) - width_offset, borderTop / 2, "Score: ", {font:"2rem Wendy One", fill:"#FFFFFF"});
+	score_text.anchor.setTo(0.5);
+
+	score_amount = this.game.add.text((game.world.width / 2) + (score_text.width / 2) + width_offset, borderTop / 2, score, {font:"2rem Wendy One", fill:"#FFFFFF"});
+	score_amount.anchor.setTo(0.5);
 
 	direction = 'right';
 	lastMoved = 'left';
@@ -283,7 +288,7 @@ function _eat_food(first_tail)
 	tail.push(tail_item);
 
 	score++;
-	score_text.text = "Score: " + score;
+	score_amount.text = score;
 
 	_generateFood();
 }
