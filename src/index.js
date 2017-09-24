@@ -50,14 +50,21 @@ function preload() {
 }
 
 function create() {
+	// Reset Variables since when you restart an instance this stuff doesn't get reset
 	tail = [];
+	score = 0;
 
 	var graphics = game.add.graphics(0, 0);
+
+	var x = Math.ceil(gridSize / 2) * gridSize + (borderSide);
+	var y = Math.ceil(gridSize / 2) * gridSize + (borderTop);
+
+	console.log(x);
 	
 	for(var i = 1; i < initialTailLength + 1; i++)
 	{
-		tail[i - 1] = game.add.sprite(game.world.centerX - (i * gridSize) + (borderSide + 1), game.world.centerY + (borderTop / 2), 'player');
-		tail[i - 1].anchor.setTo(.5, .5);
+		tail[i - 1] = game.add.sprite(x - (i * gridSize) + (borderSide + 2), y + ((borderTop) + 2), 'player');
+		//tail[i - 1].anchor.setTo(.5, .5);
 	}
 
 	// Setup Controls
@@ -110,19 +117,19 @@ function update() {
 function _wrap_world()
 {
 	if(tail[0].x > game.world.width - (borderSide)) {
-		tail[0].x = (borderSide + 1) + (tail[0].width / 2);
+		tail[0].x = (borderSide + 1);
 	}
 
 	if(tail[0].x < borderSide) {
-		tail[0].x = game.world.width - (borderSide + tail[0].width / 2);
+		tail[0].x = game.world.width - (borderSide);
 	}
 
 	if(tail[0].y > game.world.height) {
-		tail[0].y = (borderTop + 1) + (tail[0].height / 2);
+		tail[0].y = (borderTop + 1);
 	}
 
 	if(tail[0].y < borderTop) {
-		tail[0].y = game.world.height - (tail[0].height / 2);
+		tail[0].y = game.world.height;
 	}
 }
 
@@ -267,7 +274,7 @@ function _check_food_eat()
 	}
 }
 
-function _eat_food(first_tail, food_item)
+function _eat_food(first_tail)
 {
 	food_item.destroy();
 
@@ -275,7 +282,7 @@ function _eat_food(first_tail, food_item)
 	var nextY = -100;
 
 	var tail_item = game.add.sprite(nextX, nextX, 'player')
-	tail_item.anchor.setTo(.5, .5);
+	//tail_item.anchor.setTo(.5, .5);
 
 	tail.push(tail_item);
 
