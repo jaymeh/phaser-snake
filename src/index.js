@@ -167,6 +167,8 @@ function _movePlayer(x, y)
 		oldPosition.push({'x': tail[i].body.x, 'y': tail[i].body.y});
 	}
 
+	_check_tail_collision();
+
 	// Set a array for all old tail data to use later
 	for(var i = 0; i < tail.length; i++)
 	{		
@@ -194,8 +196,6 @@ function _generateFood()
 	// If it does we want to regenerate until it doesn't.
 	for(var i = 0; i < tail.length; i++)
 	{
-		console.log(tail_overlap);
-		console.log(food_overlap);
 		var match = false;
 		while(match == false)
 		{
@@ -238,13 +238,14 @@ function _trigger_death()
 
 function _check_tail_collision()
 {
-	for(var i = 0; i < tail.length; i++)
-	{
-		if(i !== 0)
-		{
-			tail_overlap = game.physics.arcade.overlap(tail[0], tail[i], _trigger_death, null, this);
-		}
-	}
+	// Check if the head of the snake overlaps with any part of the snake.
+    for(var i = 1; i < tail.length; i++) {
+        if(tail[0].body.x == tail[i].body.x && tail[0].body.y == tail[i].body.y) {
+
+            // If so, go to game over screen.
+            _trigger_death();
+        }
+    }
 }
 
 function _check_food_eat()
@@ -257,13 +258,6 @@ function _eat_food(first_tail, food_item)
 {
 	food_item.destroy();
 
-	var last_item = tail[tail.length - 1];
-	var second_last_item = tail[tail.length - 2];
-
-	// Use abs to round up because it could be - or +
-	var xDiff = last_item.body.x - second_last_item.body.x;
-	var yDiff = last_item.body.y - second_last_item.body.y;
-
 	var nextX = -100;
 	var nextY = -100;
 
@@ -273,8 +267,6 @@ function _eat_food(first_tail, food_item)
 	tail_item.enableBody = true;
 
 	tail.push(tail_item);
-
-	console.log('just ate');
 
 	_generateFood();
 	// Find out which direction we are going
