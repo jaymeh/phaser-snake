@@ -38,6 +38,9 @@ var food_item;
 var food_overlap;
 var tail_overlap;
 
+var gridWidth = (gridSize * gridSize) + (borderSide * 2);
+var gridHeight = (gridSize * gridSize) + borderTop;
+
 function preload() {
   game.load.image('player', './assets/images/green.png');
   game.load.image('food', './assets/images/food.png');
@@ -51,7 +54,7 @@ function create() {
 	
 	for(var i = 1; i < initialTailLength + 1; i++)
 	{
-		tail[i - 1] = game.add.sprite(game.world.centerX - (i * gridSize), game.world.centerY + borderTop, 'player');
+		tail[i - 1] = game.add.sprite(game.world.centerX - (i * gridSize) + (borderSide + 1), game.world.centerY + (borderTop / 2), 'player');
 		tail[i - 1].anchor.setTo(.5, .5);
 		
 		game.physics.arcade.enable(tail[i - 1]);
@@ -74,7 +77,7 @@ function create() {
 		{
 			graphics.moveTo(borderSide, borderTop);
 			graphics.lineStyle(1, 0x0000FF, 1);
-			graphics.drawRect((gridSize * i) + (borderSide), (gridSize * n) + (borderTop), gridSize, gridSize);
+			graphics.drawRect((gridSize * i) + (borderSide), (gridSize * n) + borderTop, gridSize, gridSize);
 		}
 	}
 
@@ -86,9 +89,6 @@ function create() {
 };
   
 function update() {
-	// Check death
-	_wrap_world();
-
 	// Set Direction
 	_set_direction();
 
@@ -100,12 +100,15 @@ function update() {
 
 	// Movement
 	_handle_movement();
+
+	// Check death
+	_wrap_world();
 }
 
 function _wrap_world()
 {
-	if(tail[0].body.x > game.world.width) {
-		tail[0].body.x = 0;
+	if(tail[0].body.x > game.world.width - (borderSide)) {
+		tail[0].body.x = borderSide + 1;
 	}
 
 	if(tail[0].x < 0) {
@@ -214,21 +217,21 @@ function _generateFood()
 		}
 	}
 
-	food_item = game.add.sprite((x * gridSize) + borderOffset, (y * gridSize) + borderOffset, 'food');
+	food_item = game.add.sprite((x * gridSize) + (borderOffset + borderSide), (y * gridSize) + (borderOffset +  borderTop), 'food');
 	
 	game.physics.arcade.enable(food_item);
 }
 
 function _generateX()
 {
-	var x = Math.floor(Math.random() * gridSize);
+	var x = Math.floor(Math.random() * (gridSize));
 
 	return x;
 }
 
 function _generateY()
 {
-	var y = Math.floor(Math.random() * gridSize);
+	var y = Math.floor(Math.random() * (gridSize));
 
 	return y;
 }
