@@ -14,11 +14,14 @@ import Phaser from 'expose-loader?Phaser!phaser-ce/build/custom/phaser-split.js'
  */
 
 var gridSize = 17;
-var game = new Phaser.Game(gridSize * gridSize, gridSize * gridSize, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 var player;
 var currentSpeed = 0;
 var speed = 15;
 var borderOffset = 1;
+var borderTop = 50;
+var borderSide = 50;
+
+var game = new Phaser.Game((gridSize * gridSize) + (borderSide * 2), (gridSize * gridSize) + borderTop, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 var direction = 'right';
 
@@ -48,7 +51,7 @@ function create() {
 	
 	for(var i = 1; i < initialTailLength + 1; i++)
 	{
-		tail[i - 1] = game.add.sprite(game.world.centerX - (i * gridSize), game.world.centerY, 'player');
+		tail[i - 1] = game.add.sprite(game.world.centerX - (i * gridSize), game.world.centerY + borderTop, 'player');
 		tail[i - 1].anchor.setTo(.5, .5);
 		
 		game.physics.arcade.enable(tail[i - 1]);
@@ -69,9 +72,9 @@ function create() {
 		// Rows
 		for(var n = 0; n < gridSize; n++)
 		{
-			graphics.moveTo(0,0);
+			graphics.moveTo(borderSide, borderTop);
 			graphics.lineStyle(1, 0x0000FF, 1);
-			graphics.drawRect(gridSize * i, gridSize * n, gridSize, gridSize);
+			graphics.drawRect((gridSize * i) + (borderSide), (gridSize * n) + (borderTop), gridSize, gridSize);
 		}
 	}
 
