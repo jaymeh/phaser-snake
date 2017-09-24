@@ -41,14 +41,16 @@ var tail_overlap;
 var gridWidth = (gridSize * gridSize) + (borderSide * 2);
 var gridHeight = (gridSize * gridSize) + borderTop;
 
+var score = 0;
+var score_text;
+
 function preload() {
   game.load.image('player', './assets/images/green.png');
   game.load.image('food', './assets/images/food.png');
 }
 
 function create() {
-
-	game.physics.startSystem(Phaser.Physics.ARCADE);
+	tail = [];
 
 	var graphics = game.add.graphics(0, 0);
 	
@@ -56,10 +58,6 @@ function create() {
 	{
 		tail[i - 1] = game.add.sprite(game.world.centerX - (i * gridSize) + (borderSide + 1), game.world.centerY + (borderTop / 2), 'player');
 		tail[i - 1].anchor.setTo(.5, .5);
-		
-		game.physics.arcade.enable(tail[i - 1]);
-
-		tail[i - 1].enableBody = true;
 	}
 
 	// Setup Controls
@@ -80,6 +78,10 @@ function create() {
 			graphics.drawRect((gridSize * i) + (borderSide), (gridSize * n) + borderTop, gridSize, gridSize);
 		}
 	}
+
+	// Draw score title
+	score_text = this.game.add.text(game.world.width / 2, borderTop / 2, "Score: " + score, {font:"2rem Wendy One", fill:"#FFFFFF"});
+	score_text.anchor.setTo(0.5, 0.5);
 
 	direction = 'right';
 	lastMoved = 'left';
@@ -107,20 +109,20 @@ function update() {
 
 function _wrap_world()
 {
-	if(tail[0].body.x > game.world.width - (borderSide)) {
-		tail[0].body.x = borderSide + 1;
+	if(tail[0].x > game.world.width - (borderSide)) {
+		tail[0].x = (borderSide + 1) + (tail[0].width / 2);
 	}
 
-	if(tail[0].x < 0) {
-		tail[0].body.x = game.world.width - tail[0].width;
+	if(tail[0].x < borderSide) {
+		tail[0].x = game.world.width - (borderSide + tail[0].width / 2);
 	}
 
 	if(tail[0].y > game.world.height) {
-		tail[0].body.y = 0;
+		tail[0].y = (borderTop + 1) + (tail[0].height / 2);
 	}
 
-	if(tail[0].y < 0) {
-		tail[0].body.y = game.world.height - tail[0].height;
+	if(tail[0].y < borderTop) {
+		tail[0].y = game.world.height - (tail[0].height / 2);
 	}
 }
 
@@ -139,22 +141,22 @@ function _handle_movement()
 		switch(direction)
 		{
 			case 'up':
-				_movePlayer(tail[0].body.x, tail[0].body.y - gridSize);
+				_movePlayer(tail[0].x, tail[0].y - gridSize);
 				lastMoved = direction;
 				break;
 
 			case 'down':
-				_movePlayer(tail[0].body.x, tail[0].body.y + gridSize);
+				_movePlayer(tail[0].x, tail[0].y + gridSize);
 				lastMoved = direction;
 				break;
 
 			case 'left':
-				_movePlayer(tail[0].body.x - gridSize, tail[0].body.y);
+				_movePlayer(tail[0].x - gridSize, tail[0].y);
 				lastMoved = direction;
 				break;
 
 			case 'right':
-				_movePlayer(tail[0].body.x + gridSize, tail[0].body.y);
+				_movePlayer(tail[0].x + gridSize, tail[0].y);
 				lastMoved = direction;
 				break;
 		}
@@ -170,7 +172,7 @@ function _movePlayer(x, y)
 	var oldPosition = [];
 	for(var i = 0; i < tail.length; i++)
 	{
-		oldPosition.push({'x': tail[i].body.x, 'y': tail[i].body.y});
+		oldPosition.push({'x': tail[i].x, 'y': tail[i].y});
 	}
 
 	_check_tail_collision();
@@ -180,14 +182,14 @@ function _movePlayer(x, y)
 	{		
 		if(i == 0)
 		{
-			tail[i].body.x = x;
-			tail[i].body.y = y;
+			tail[i].x = x;
+			tail[i].y = y;
 		}
 		else
 		{
 			var newI = i - 1;
-			tail[i].body.x = oldPosition[i - 1].x;
-			tail[i].body.y = oldPosition[i - 1].y;
+			tail[i].x = oldPosition[i - 1].x;
+			tail[i].y = oldPosition[i - 1].y;
 		}
 	}
 }
@@ -205,7 +207,7 @@ function _generateFood()
 		var match = false;
 		while(match == false)
 		{
-			if(tail[i].body.x == x && tail[i].body.y == y)
+			if(tail[i].x == x && tail[i].y == y)
 			{
 				x = _generateX();
 				y = _generateY();
@@ -218,8 +220,6 @@ function _generateFood()
 	}
 
 	food_item = game.add.sprite((x * gridSize) + (borderOffset + borderSide), (y * gridSize) + (borderOffset +  borderTop), 'food');
-	
-	game.physics.arcade.enable(food_item);
 }
 
 function _generateX()
@@ -238,7 +238,6 @@ function _generateY()
 
 function _trigger_death()
 {
-	tail = [];
 	game.state.restart();
 }
 
@@ -246,7 +245,7 @@ function _check_tail_collision()
 {
 	// Check if the head of the snake overlaps with any part of the snake.
     for(var i = 1; i < tail.length; i++) {
-        if(tail[0].body.x == tail[i].body.x && tail[0].body.y == tail[i].body.y) {
+        if(tail[0].x == tail[i].x && tail[0].y == tail[i].y) {
 
             // If so, go to game over screen.
             _trigger_death();
@@ -256,8 +255,16 @@ function _check_tail_collision()
 
 function _check_food_eat()
 {
+	if(currentSpeed == 10)
+	{
+		console.log('Tail: ', tail[0].x, tail[0].y);
+		console.log('Food: ', food_item.x, food_item.y);
+	}
 	// Check if theres some food
-	food_overlap = game.physics.arcade.overlap(tail[0], food_item, _eat_food, null, this);
+	if(tail[0].x == food_item.x && tail[0].y == food_item.y)
+	{
+		_eat_food();
+	}
 }
 
 function _eat_food(first_tail, food_item)
@@ -269,17 +276,11 @@ function _eat_food(first_tail, food_item)
 
 	var tail_item = game.add.sprite(nextX, nextX, 'player')
 	tail_item.anchor.setTo(.5, .5);
-	game.physics.arcade.enable(tail_item);
-	tail_item.enableBody = true;
 
 	tail.push(tail_item);
 
+	score++;
+	score_text.text = "Score: " + score;
+
 	_generateFood();
-	// Find out which direction we are going
-	
-	// Calculate x and y somehow
-	
-	// Add to score
-	
-	// Trigger a move for the food item
 }
