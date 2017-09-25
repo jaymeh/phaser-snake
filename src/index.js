@@ -19,7 +19,7 @@ var currentSpeed = 0;
 var speed = 15;
 var borderOffset = 1;
 var borderTop = 50;
-var borderSide = 50;
+var borderSide = 55;
 
 var game = new Phaser.Game((gridSize * gridSize) + (borderSide * 2), (gridSize * gridSize) + borderTop, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
@@ -46,6 +46,8 @@ var score_amount;
 var score_text;
 var width_offset = 5;
 
+var textColour = '#FFFFFF';
+
 function preload() {
   game.load.image('player', './assets/images/green.png');
   game.load.image('food', './assets/images/food.png');
@@ -68,6 +70,8 @@ function create() {
 		tail[i - 1] = game.add.sprite(x - (i * gridSize) + (borderSide + 2), y + 1, 'player');
 	}
 
+	game.stage.backgroundColor = '#484b5e';
+
 	// Setup Controls
 	upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
     downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
@@ -82,16 +86,18 @@ function create() {
 		for(var n = 0; n < gridSize; n++)
 		{
 			graphics.moveTo(borderSide, borderTop);
-			graphics.lineStyle(1, 0x0000FF, 1);
+			graphics.lineStyle(1, 0x0f380f, 1);
+			graphics.beginFill(0x9bbc0f);
 			graphics.drawRect((gridSize * i) + (borderSide), (gridSize * n) + borderTop, gridSize, gridSize);
+			graphics.endFill();
 		}
 	}
 
 	// Draw score title
-	score_text = this.game.add.text((game.world.width / 2) - width_offset, borderTop / 2, "Score: ", {font:"2rem Wendy One", fill:"#FFFFFF"});
+	score_text = this.game.add.text((game.world.width / 2) - width_offset, borderTop / 2, "Score: ", {font:"2rem Wendy One", fill: textColour});
 	score_text.anchor.setTo(0.5);
 
-	score_amount = this.game.add.text((game.world.width / 2) + (score_text.width / 2) + width_offset, borderTop / 2, score, {font:"2rem Wendy One", fill:"#FFFFFF"});
+	score_amount = this.game.add.text((game.world.width / 2) + (score_text.width / 2) + width_offset, borderTop / 2, score, {font:"2rem Wendy One", fill: textColour});
 	score_amount.anchor.setTo(0.5);
 
 	direction = 'right';
@@ -125,7 +131,7 @@ function _wrap_world()
 	}
 
 	if(tail[0].x < borderSide) {
-		tail[0].x = game.world.width - (borderSide);
+		tail[0].x = (game.world.width - borderSide) - (gridSize - 1);
 	}
 
 	if(tail[0].y > game.world.height) {
@@ -133,7 +139,7 @@ function _wrap_world()
 	}
 
 	if(tail[0].y < borderTop) {
-		tail[0].y = game.world.height;
+		tail[0].y = ((game.world.height - gridSize) + 1);
 	}
 }
 
