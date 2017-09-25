@@ -19,7 +19,7 @@ var currentSpeed = 0;
 var speed = 15;
 var borderOffset = 1;
 var borderTop = 50;
-var borderSide = 55;
+var borderSide = 50;
 
 var game = new Phaser.Game((gridSize * gridSize) + (borderSide * 2), (gridSize * gridSize) + borderTop, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
@@ -51,6 +51,8 @@ var textColour = '#FFFFFF';
 function preload() {
   game.load.image('player', './assets/images/green.png');
   game.load.image('food', './assets/images/food.png');
+
+  game.load.audio('eat', ['./assets/sound/eat.mp3', './assets/sound/eat.ogg']);
 }
 
 function create() {
@@ -295,6 +297,8 @@ function _eat_food(first_tail)
 
 	score++;
 	score_amount.text = score;
+
+	game.sound.play('eat');
 
 	_generateFood();
 }
