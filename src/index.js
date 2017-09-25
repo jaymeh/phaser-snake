@@ -296,9 +296,18 @@ function _eat_food(first_tail)
 	tail.push(tail_item);
 
 	score++;
+
+	var scoreTween = game.add.tween(score_amount.scale).to( { x: 1.2, y: 1.2 }, 150, "Linear", true);
 	score_amount.text = score;
+
+	scoreTween.onComplete.add(scaleDownText, true);
 
 	game.sound.play('eat');
 
 	_generateFood();
+}
+
+function scaleDownText()
+{
+	game.add.tween(score_amount.scale).to( { x: 1, y: 1 }, 150, "Linear", true);
 }
