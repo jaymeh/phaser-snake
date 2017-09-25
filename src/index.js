@@ -44,7 +44,7 @@ var gridHeight = (gridSize * gridSize) + borderTop;
 var score = 0;
 var score_amount;
 var score_text;
-var width_offset = 5;
+var width_offset = 15;
 
 var textColour = '#FFFFFF';
 
